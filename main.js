@@ -2,7 +2,7 @@ var roleHarvester = require('role.harvester');
 var roleUpgrader = require('role.upgrader');
 var roleBuilder = require('role.builder');
 var roleRepairer = require('role.repairer');
-var roleRepairer = require('role.trooper');
+var roleTrooper = require('role.trooper');
 
 module.exports.loop = function () {
     //Some Settings:
@@ -13,7 +13,7 @@ module.exports.loop = function () {
     workersRatio['builders'] = 0.5;
     workersRatio['upgraders'] = 0.5;
     workersRatio['repairers'] = 0;
-    workersRatio['troopers'] = 0.5;
+    workersRatio['troopers'] = 1;
 
     //Tick Control:
     console.log("----------[ New Tick ]----------");

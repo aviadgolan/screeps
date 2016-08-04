@@ -2,7 +2,8 @@ var roleTrooper = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
-        var hostiles = Game.rooms[roomName].find(FIND_HOSTILE_CREEPS);
+        var roomName = '';
+        var hostiles = creep.room.find(FIND_HOSTILE_CREEPS);
         
         if(hostiles.length > 0) {
             if(creep.attack(hostiles[0]) == ERR_NOT_IN_RANGE) {
