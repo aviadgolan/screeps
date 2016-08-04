@@ -2,16 +2,18 @@ var roleHarvester = require('role.harvester');
 var roleUpgrader = require('role.upgrader');
 var roleBuilder = require('role.builder');
 var roleRepairer = require('role.repairer');
+var roleRepairer = require('role.trooper');
 
 module.exports.loop = function () {
     //Some Settings:
     var roomLvl = 2;
     var doSpawn = true; //PANIC BUTTON!
     var workersRatio = new Array();
-    workersRatio['harversters'] = 1.5;
-    workersRatio['builders'] = 1.5;
-    workersRatio['upgraders'] = 1.5;
+    workersRatio['harversters'] = 1;
+    workersRatio['builders'] = 0.5;
+    workersRatio['upgraders'] = 0.5;
     workersRatio['repairers'] = 0;
+    workersRatio['troopers'] = 0.5;
 
     //Tick Control:
     console.log("----------[ New Tick ]----------");
@@ -167,6 +169,40 @@ module.exports.loop = function () {
         console.log('Spawning new repairer: ' + newName);
     }
     
+    //Manage Troopers:
+    var troopers = _.filter(Game.creeps, (creep) => creep.memory.role == 'trooper');
+    console.log('troopers: ' + troopers.length);
+
+    if(troopers.length < (roomLvl * workersRatio['troopers']) && doSpawn) {
+        //Lets find a free name:
+        var newName = "trooper";
+        var num = 1;
+        var exist = false;
+        while (!exist) {
+            exist = true;
+            newName = "trooper" + String(num);
+            for(var name in Game.creeps) {
+                if (name == newName) {
+                    exist = false;
+                }
+            }
+            num++;
+        }
+        
+        //Then we spawn one:
+        switch (roomLvl) {
+            case 1:
+                var newName = Game.spawns['Spawn1'].createCreep([ATTACK, TOUGH, MOVE], newName, {role: 'repairer'});
+                break;
+            case 2:
+                var newName = Game.spawns['Spawn1'].createCreep([ATTACK, ATTACK, ATTACK, ATTACK, TOUGH, TOUGH, MOVE, MOVE], newName, {role: 'trooper'});
+                break;
+            default:
+                //PASS
+        }
+        console.log('Spawning new trooper: ' + newName);
+    }
+    
     //Assign work loop:
     for(var name in Game.creeps) {
         var creep = Game.creeps[name];
@@ -181,6 +217,9 @@ module.exports.loop = function () {
         }
         if(creep.memory.role == 'repairer') {
             roleRepairer.run(creep);
+        }
+        if(creep.memory.role == 'trooper') {
+            roleTrooper.run(creep);
         }
     }
 }
