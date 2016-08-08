@@ -3,17 +3,17 @@ var roleBuilder = {
     /** @param {Creep} creep **/
     run: function(creep) {
 
-	    if(creep.memory.building && creep.carry.energy == 0) {
+	    if (creep.memory.building && creep.carry.energy == 0) {
             creep.memory.building = false;
             creep.say('B:hvst');
 	    }
-	    if(!creep.memory.building && creep.carry.energy == creep.carryCapacity) {
+	    if (!creep.memory.building && creep.carry.energy == creep.carryCapacity) {
 	        creep.memory.building = true;
 	    }
 
-	    if(creep.memory.building) {
+	    if (creep.memory.building) {
 	        var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
-            if(targets.length > 0) {
+            if (targets.length > 0) {
                 if(creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
                     creep.say('B:trgt?');
                     creep.moveTo(targets[0]);
@@ -24,7 +24,7 @@ var roleBuilder = {
             }
             //Nothing to build.. upgrade!
             else {
-                if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+                if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(creep.room.controller);
                     creep.say('B:rcl?');
                 }

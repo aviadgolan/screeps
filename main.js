@@ -4,16 +4,17 @@ var roleBuilder = require('role.builder');
 var roleRepairer = require('role.repairer');
 var roleTrooper = require('role.trooper');
 
+
 module.exports.loop = function () {
     //Some Settings:
-    var roomLvl = 2;
+    var roomLvl = Game.spawns['Spawn1'].room.controller.level;
     var doSpawn = true; //PANIC BUTTON!
     var workersRatio = new Array();
-    workersRatio['harversters'] = 1;
-    workersRatio['builders'] = 0.5;
-    workersRatio['upgraders'] = 0.5;
-    workersRatio['repairers'] = 0;
-    workersRatio['troopers'] = 1;
+    workersRatio['harversters'] = 1.5;
+    workersRatio['builders'] = 1.5;
+    workersRatio['upgraders'] = 1;
+    workersRatio['repairers'] = 0.5;
+    workersRatio['troopers'] = 0;
 
     //Tick Control:
     console.log("----------[ New Tick ]----------");
@@ -25,6 +26,19 @@ module.exports.loop = function () {
             console.log('Clearing non-existing creep memory:', name);
         }
     }
+    
+    //Print room energy:
+    var roomStructures = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
+        filter: (structure) => {
+            return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN);
+        }
+    });
+    var totalEnery = 0;
+    for (var tmpStructure in roomStructures) {
+        totalEnery += roomStructures[tmpStructure].energy;
+    }
+    console.log("Room Energy = " + totalEnery)
+    
     
     //Manage harvester:
     var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
@@ -47,13 +61,16 @@ module.exports.loop = function () {
         }
         
         //Then we spawn one:
-        if (harvesters.length == 0 && Game.spawns['Spawn1'].spawning == null) {
+        if (harvesters.length == 0 && roomLvl > 0 && Game.spawns['Spawn1'].spawning == null) {
             //OMG NO HARVESTERS!!! Build a basic one
             var newName = Game.spawns['Spawn1'].createCreep([WORK, CARRY, MOVE], newName, {role: 'harvester'});
             console.log('Spawning new harvester: ' + newName);
         }
         else if (Game.spawns['Spawn1'].spawning == null) {
             switch (roomLvl) {
+                case 0:
+                    var newName = Game.spawns['Spawn1'].createCreep([WORK, CARRY, MOVE], newName, {role: 'harvester'});
+                    break;
                 case 1:
                     var newName = Game.spawns['Spawn1'].createCreep([WORK, CARRY, MOVE], newName, {role: 'harvester'});
                     break;
@@ -89,7 +106,7 @@ module.exports.loop = function () {
         
         //Then we spawn one:
         switch (roomLvl) {
-            case 1:
+            case 2:
                 var newName = Game.spawns['Spawn1'].createCreep([WORK, CARRY, MOVE], newName, {role: 'upgrader'});
                 break;
             case 2:
@@ -122,15 +139,24 @@ module.exports.loop = function () {
         }
         
         //Then we spawn one:
-        switch (roomLvl) {
-            case 1:
-                var newName = Game.spawns['Spawn1'].createCreep([WORK, CARRY, MOVE], newName, {role: 'builder'});
-                break;
-            case 2:
-                var newName = Game.spawns['Spawn1'].createCreep([WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE], newName, {role: 'builder'});
-                break;
-            default:
-                //PASS
+        if (builders.length == 0 && roomLvl > 1) {
+            //Panic! no builders:
+            var newName = Game.spawns['Spawn1'].createCreep([WORK, CARRY, MOVE], newName, {role: 'builder'});
+        }
+        else {
+            switch (roomLvl) {
+                case 1:
+                    var newName = Game.spawns['Spawn1'].createCreep([WORK, CARRY, MOVE], newName, {role: 'builder'});
+                    break;
+                case 2:
+                    var newName = Game.spawns['Spawn1'].createCreep([WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE], newName, {role: 'builder'});
+                    break;
+                case 3:
+                    var newName = Game.spawns['Spawn1'].createCreep([WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE], newName, {role: 'builder'});
+                    break;
+                default:
+                    //PASS
+        }
         }
         console.log('Spawning new builder: ' + newName);
     }
@@ -192,10 +218,11 @@ module.exports.loop = function () {
         //Then we spawn one:
         switch (roomLvl) {
             case 1:
-                var newName = Game.spawns['Spawn1'].createCreep([ATTACK, TOUGH, MOVE], newName, {role: 'repairer'});
+                var newName = Game.spawns['Spawn1'].createCreep([TOUGH, ATTACK, MOVE], newName, {role: 'repairer'});
                 break;
             case 2:
-                var newName = Game.spawns['Spawn1'].createCreep([ATTACK, ATTACK, ATTACK, ATTACK, TOUGH, TOUGH, MOVE, MOVE], newName, {role: 'trooper'});
+                //var newName = Game.spawns['Spawn1'].createCreep([ATTACK, ATTACK, ATTACK, ATTACK, TOUGH, TOUGH, MOVE, MOVE], newName, {role: 'trooper'});
+                var newName = Game.spawns['Spawn1'].createCreep([TOUGH, TOUGH, ATTACK, ATTACK, MOVE], newName, {role: 'trooper'});
                 break;
             default:
                 //PASS
